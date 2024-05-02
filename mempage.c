@@ -1,23 +1,47 @@
 // #include "mempage.h"
 
 #include <stdio.h>
-int navarra(int input)
+#include <stdlib.h>
+#include <sys/mman.h>
+#include "mempage.h"
+
+typedef struct memory_page_t {
+    int size;
+    int magic;
+    void *memory;
+} mem_t;
+
+
+mem_t *head;
+
+int init(int heap_size)
 {
-    return input * 2 + 1;
+    if(head == NULL)
+    {
+        // void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+        head = mmap(NULL, heap_size, PROT_EXEC, 0, 0, 0);
+        if (head == MAP_FAILED)
+            return -1;
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+
 }
 
-int main()
+void *mem_allocate(int size)
 {
-    // this is a comment
-    typedef struct test_structure {
-        int test;
-        int test2;
-    } test_t;
+    void* memory_to_give = NULL;
 
-    int the_shipment = navarra(5);
-
-    printf("hello, computer!\n");
-    return 0;
+    return memory_to_give;
 }
 
-//that kid probably has the code
+void mem_free (void *pointer_to_free)
+{
+    if(pointer_to_free != NULL)
+    {
+
+    }
+}
