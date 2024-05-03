@@ -32,7 +32,8 @@ typedef struct allocated_memory {
 } alloc_t;
 
 memory_list *head;
-void *heap_space;
+void* lower_bound;
+void* upper_bound;
 
 
 
@@ -48,6 +49,8 @@ int init(int heap_size)
         // void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
         //int file_descriptor = open("/dev/zero", O_RDWR);
         head = mmap(NULL, real_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+        lower_bound = head;
+        upper_bound = (void*) head + real_size;
 
         if (head == MAP_FAILED)
         {
@@ -81,7 +84,7 @@ void *mem_allocate(int size)
     {
         if (runner->header.size >= true_size)
         {
-            alloc_t *alloc = (void*) &runner;
+            alloc_t *alloc = (void*) runner;
             // rearrange free list
             runner = (void*) runner + true_size;
             runner->header.size -= true_size;
