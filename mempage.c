@@ -98,8 +98,17 @@ void *mem_allocate(int size)
             head_pointer = NULL;
         }
         if (head_pointer != NULL)
-            head_pointer = (memory_list**) &temp->next;
+            head_pointer = (memory_list**) temp->next;
     }
+    /*
+     * print statements to show request information.
+    printf("request to alloc %ld bytes\n", true_size);
+    printf("head has %ld space\n", head->size);
+    if (head->next != NULL)
+    {
+        printf("       head->next had %ld size\n", head->next->size);
+    }
+    */
     return memory_to_give;
 }
 
@@ -111,9 +120,10 @@ void coalesce()
         if(runner->next != NULL)
         {
             memory_list *next_location = runner->next;
-            if (next_location == (void *) runner + sizeof(memory_list) + runner->size) {
+            while (next_location == (void *) runner + sizeof(memory_list) + runner->size) {
                 runner->size += sizeof(memory_list) + next_location->size;
                 runner->next = runner->next->next;
+                next_location = runner->next;
             }
         }
         runner = runner->next;
@@ -135,15 +145,7 @@ void mem_free (void *pointer_to_free)
             alloc_t *to_remove = (void*) pointer_to_free - sizeof(alloc_t);
             // this might be unnecessary ?
             unsigned int size = to_remove->size;
-            /*
-             * my compiler tells me the structs are always the same size, and they are on my machine, but
-             * I'm not 100% sure it is on every machine. I'm sure it's fine to not worry about this for now.
-            unsigned int difference = 0;
-            if(sizeof(alloc_t) > sizeof(memory_list))
-                difference = sizeof(alloc_t) - sizeof(memory_list);
-            else
-                difference = sizeof(memory_list) - sizeof(alloc_t);
-            */
+
             memory_list *new_free = (void*) to_remove;
             new_free->size = size;
             new_free->next = NULL;
@@ -177,49 +179,21 @@ void mem_free (void *pointer_to_free)
                 } // end while (insert traversal)
             }
             coalesce();
+            // TESTING LIST
+            /*
+            printf("free space:\n");
+            memory_list *tester = head;
+            while(tester != NULL)
+            {
+                printf("      block of %ld space @ addr %p\n", tester->size, tester);
+                printf("lower: %p | upper: %p\n", lower_bound, upper_bound);
+                tester = tester->next;
+            }
+             */
+            // END TESTING LIST
         }
         else
             perror("pointer in memory space, but not allocated.\n");
     }
 }
 
-int main()
-{
-    if (init(1))
-    {
-        printf("head pointer: %p\n", head);
-        printf("head->size =  %ld\n", head->size);
-        printf("head->next =  %p\n", head->next);
-        printf("mem:          %p\n", (void*) head + sizeof(memory_list));
-        printf("sizeof fl:    %lu\n\n", sizeof(alloc_t));
-
-        // other stuff
-        char* test = mem_allocate(16);
-        printf("loc of test: %p\n", test);
-        printf("loc of head: %p\n", head);
-
-        char* test2 = mem_allocate(16);
-        printf("loc of test2: %p\n", test2);
-        printf("loc of head: %p\n", head);
-
-        strcpy(test, "asdfqwer");
-        strcpy(test2, "123456789");
-        printf("test1: %s, test2: %s\n", test, test2);
-
-        printf("\n");
-        mem_free(test2);
-        printf("loc of head: %p\n", head);
-        printf("     head->size = %ld\n", head->size);
-        if (head->next != NULL)
-            printf("     next->size = %ld\n", head->next->size);
-        printf("loc of test: %p\n", test);
-        printf("loc of test2: %p\n", test2);
-
-    }
-    else
-    {
-        printf("failed\n");
-
-    }
-    
-}
