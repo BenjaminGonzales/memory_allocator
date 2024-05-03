@@ -1,4 +1,4 @@
-#include "mempage.c"
+#include "mem_alloc.h"
 #include <stdio.h>
 
 #define SIZE 500

@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
-#include "mempage.h"
+#include "mem_alloc.h"
 
 #define MAGIC_NUMBER 1234567
 
